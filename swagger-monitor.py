@@ -4,6 +4,7 @@ import requests
 import hashlib
 import os
 import re
+import json
 from datetime import datetime
 
 # 설정
@@ -53,7 +54,11 @@ def check_swagger(name, base_url):
         if resp.status_code != 200:
             return None, None
 
-        new_hash = hashlib.md5(resp.content).hexdigest()
+        # JSON 파싱 후 키 정렬하여 정규화
+        spec_data = resp.json()
+        normalized_spec = json.dumps(spec_data, sort_keys=True)
+        new_hash = hashlib.md5(normalized_spec.encode('utf-8')).hexdigest()
+
         hash_file = os.path.join(SPEC_STORE, f"{name}.hash")
 
         old_hash = ""
